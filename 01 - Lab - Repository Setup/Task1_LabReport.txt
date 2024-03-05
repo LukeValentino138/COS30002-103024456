@@ -1,0 +1,13 @@
+# Lab Report for Task 1: Repository Setup
+
+## Personal Information
+- Name: Luke Valentino
+- Student ID: 103024456
+- Unit Code: COS30002
+- Date: 5/03/2024
+
+## Actions Taken
+1. Created a repository based on the AI4G-base template. The repository is named COS30002-103024456 and set to private visibility.
+2. Added my tutor as a collaborator to the repository using their Swinburne email address.
+3. Updated the README.md file with initial details about the repository and made my first commit with an appropriate message.
+

@@ -43,8 +43,7 @@ while alive:
     if current_state == 'resting':
         print("I'm resting!")
         health += 4
-        if health > 1:
-            current_state = "exploring"
+        current_state = "exploring"
 
     if game_time > max_limit:
         print("Game Over! Time ran out!")

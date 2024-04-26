@@ -1,43 +1,101 @@
 #Tic Tac Toe
 
+import random
+from collections import deque
+
 class Game:
     def __init__(self):
-        win_set = (
-            (0, 1, 2), (0,4,8), (0,3,6),
-            (1,4,7), (2,4,6), (2,5,8),
-            (3,4,5), (6,7,8)
+        self.win_set = (
+            (0, 1, 2), (3, 4, 5), (6, 7, 8),  # horizontal wins
+            (0, 3, 6), (1, 4, 7), (2, 5, 8),  # vertical wins
+            (0, 4, 8), (2, 4, 6)             # diagonal wins
         )
-        self.win_set = win_set
-        self.board = [" "]*9
-        self.player1 = "x"
-        self.player2 = "o"
-        self.currentplayer = self.player1
+        # self.board = [" "]*9
+        self.board = [" ", " O", "X", "X", "X", "O", "O", "X", "O"]
+        self.player1 = "X"
+        self.player2 = "O"
+        self.current_player = self.player1
         self.winner = None
+        self.adj_list = {}  # Initialize game graph
 
-    def check_win(self):
-        for set in self.win_set:
-            if self.board[set[0]] == self.board[set[1]] == self.board[set[2]] != " ":
-                self.winner = self.currentplayer
-                return self.winner
+    def check_win(self, board):
+        for win_condition in self.win_set:
+            if board[win_condition[0]] == board[win_condition[1]] == board[win_condition[2]] != " ":
+                return self.current_player
+            if ' ' not in board:
+                return "tie"
+        return False
+    
+    def check_legality(self, move, board):
+            return 0 <= move < 9 and board[move] == " "
+
+    def generate_adj_list(self):
+        initial_board = tuple(self.board)
+        queue = deque([initial_board])  # Start with the initial board state
+        self.adj_list[initial_board] = []  # Initialize the root node
+
+        while queue:
+            current_board = list(queue.popleft())
+            current_player = self.player1 if current_board.count(self.player1) == current_board.count(self.player2) else self.player2
+
+            if self.check_win(current_board):
+                continue  # Skip further exploration from winning boards
+
+            for i in range(len(current_board)):
+                if self.check_legality(i, current_board):
+                    new_board = current_board[:]
+                    new_board[i] = current_player
+                    new_board_key = tuple(new_board)
+
+                    # Initialize new board state in adjacency list if doesnt exist
+                    if new_board_key not in self.adj_list:
+                        self.adj_list[new_board_key] = []
+                        queue.append(new_board_key)
+
+                    # Append new state to current state's list if doesnt exist
+                    if new_board_key not in self.adj_list[tuple(current_board)]:
+                        self.adj_list[tuple(current_board)].append(new_board_key)
+
+        return self.adj_list
+
+    def find_move(self,current_board, next_board):
+        for i in range(len(current_board)):
+            if current_board[i] == ' ' and next_board[i] != ' ':
+                return i
+
+    def random_choice(self, board):
+        board_key = tuple(board)
+        if board_key in self.adj_list:
+            possible_moves = self.adj_list[board_key]
+            if possible_moves:
+                move_board = random.choice(possible_moves)
+                move_index = self.find_move(list(board_key), list(move_board))
+                if move_index is not None:
+                    print(f"Move made at index {move_index} by player {move_board[move_index]}")
+                    return move_index
+        return None
 
     def player1_move(self):
-        return int(input("Player 1 (X) - Enter your move (0-8): "))
+        while True:
+            try:
+                user_input = input("Player 1 (X) - Enter your move (0-8): ")
+                move = int(user_input)  # Attempt to convert the input to an integer
+                if 0 <= move < 9 and self.board[move] == " ":  # Check if the move is legal
+                    return move
+                else:
+                    print("Invalid move. Please enter a number between 0-8 for an empty spot.")
+            except ValueError:
+                print("Invalid input. Please enter a valid integer.")
+
     
     def player2_move(self):
-        return int(input("Player 2 (O) - Enter your move (0-8): "))
+        return game.random_choice(game.board)
 
     def get_move(self):
-        if self.currentplayer == self.player1:
+        if self.current_player == self.player1:
             return self.player1_move()
-        elif self.currentplayer == self.player2:
+        elif self.current_player == self.player2:
             return self.player2_move()
-
-    def check_legality(self, move):
-        if 0 <= move < 9 and self.board[move] == " ":
-            self.board[move] = self.currentplayer
-            return True
-        else:
-            return False
 
     def render_board(self):
         '''Display the current game board to screen.'''
@@ -49,17 +107,30 @@ class Game:
         print('    %s | %s | %s' % tuple(board[6:]))
 
         if self.winner is None:
-            print('The current player is: %s' % self.currentplayer)
+            print('The current player is: %s' % self.current_player) 
+
+def print_adjacency_list(adj_list):
+    for key, values in adj_list.items():
+        print(f"From state {key}:")
+        for value in values:
+            print(f"  -> To state {value}")
+        print()  # Add a newline for better separation
 
 if __name__ == '__main__':
     game = Game()
+    game.generate_adj_list()
+    print(len(game.adj_list))
     while game.winner is None:
+        game.render_board()
         move = game.get_move()
-        if game.check_legality(move):
-            game.check_win()
-            game.render_board()
-            # Switch player
-            game.currentplayer = game.player2 if game.currentplayer == game.player1 else game.player1
+        if game.check_legality(move, game.board):
+            game.board[move] = game.current_player  # Apply the move
+            check = game.check_win(game.board)
+            if check:
+                game.winner = check  # Update the winner if win condition is met
+                break  # Exit the loop as we have a winner
+            game.current_player = game.player2 if game.current_player == game.player1 else game.player1  # Switch player
         else:
             print("Invalid move. Try again.")
+    game.render_board()
     print(f"Player {game.winner} wins!")

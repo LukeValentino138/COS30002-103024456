@@ -10,8 +10,8 @@ class Game:
             (0, 3, 6), (1, 4, 7), (2, 5, 8),  # vertical wins
             (0, 4, 8), (2, 4, 6)             # diagonal wins
         )
-        # self.board = [" "]*9
-        self.board = [" ", " O", "X", "X", "X", "O", "O", "X", "O"]
+        self.board = [" "]*9
+        # self.board = [" ", " O", "X", "X", "X", "O", "O", "X", "O"]
         # self.board = [" ", " O", "X", "X", "X", "O", "O", "O", "X"]
         self.player1 = "X"
         self.player2 = "O"
@@ -74,6 +74,22 @@ class Game:
                     print(f"Move made at index {move_index} by player {move_board[move_index]}")
                     return move_index
         return None
+    
+    def random_search(self):
+        current_board = list(self.board)
+        path = []
+
+        while True:
+            move = random.randint(0, 8)
+            if self.check_legality(move, current_board):
+                current_board[move] = self.current_player  # Make the move
+                path.append(list(current_board))  # Record the board state
+
+                if self.check_win(current_board):
+                    print(path)  
+                    return path  # Return the path to victory
+            else:
+                continue
 
     def player1_move(self):
         while True:
@@ -89,7 +105,10 @@ class Game:
 
     
     def player2_move(self):
-        return game.random_choice(game.board)
+        path = self.random_search()  # Get the path of moves
+        move = self.find_move(self.board, path[0])
+        print(move)
+        return move
 
     def get_move(self):
         if self.current_player == self.player1:

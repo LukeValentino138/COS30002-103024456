@@ -12,6 +12,7 @@ class Game:
         )
         # self.board = [" "]*9
         self.board = [" ", " O", "X", "X", "X", "O", "O", "X", "O"]
+        # self.board = [" ", " O", "X", "X", "X", "O", "O", "O", "X"]
         self.player1 = "X"
         self.player2 = "O"
         self.current_player = self.player1
@@ -21,10 +22,9 @@ class Game:
     def check_win(self, board):
         for win_condition in self.win_set:
             if board[win_condition[0]] == board[win_condition[1]] == board[win_condition[2]] != " ":
-                return self.current_player
-            if ' ' not in board:
-                return "tie"
-        return False
+                return board[win_condition[0]]  # Return the player who has won
+        return None  # No winner found
+
     
     def check_legality(self, move, board):
             return 0 <= move < 9 and board[move] == " "
@@ -109,28 +109,34 @@ class Game:
         if self.winner is None:
             print('The current player is: %s' % self.current_player) 
 
+    def check_tie(self, board):
+        if ' ' not in board and self.check_win(board) is None:
+            return "tie"
+        return None
+
 def print_adjacency_list(adj_list):
     for key, values in adj_list.items():
         print(f"From state {key}:")
         for value in values:
             print(f"  -> To state {value}")
-        print()  # Add a newline for better separation
+        print()
 
 if __name__ == '__main__':
     game = Game()
     game.generate_adj_list()
     print(len(game.adj_list))
-    while game.winner is None:
+    while True:
         game.render_board()
+        if game.check_win(game.board):
+            game.winner = game.check_win(game.board)
+            print(f"Player {game.winner} wins!")
+            break
+        if game.check_tie(game.board) == "tie":
+            print("Player tie wins!")
+            break
         move = game.get_move()
         if game.check_legality(move, game.board):
-            game.board[move] = game.current_player  # Apply the move
-            check = game.check_win(game.board)
-            if check:
-                game.winner = check  # Update the winner if win condition is met
-                break  # Exit the loop as we have a winner
+            game.board[move] = game.current_player  
             game.current_player = game.player2 if game.current_player == game.player1 else game.player1  # Switch player
         else:
             print("Invalid move. Try again.")
-    game.render_board()
-    print(f"Player {game.winner} wins!")

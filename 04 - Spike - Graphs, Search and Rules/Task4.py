@@ -58,12 +58,52 @@ class Game:
 
         return self.adj_list
 
-    def find_move(self,current_board, next_board):
+    def find_move(self, current_board, next_board):
         for i in range(len(current_board)):
             if current_board[i] == ' ' and next_board[i] != ' ':
                 return i
 
-    def random_choice(self, board):
+    def assign_position_value(self, new_board, current_board):
+        points_set = [3, 2, 3, 2, 4, 2, 3, 2, 3]  # Score values for each position
+        score = 0
+        for i in range(9):  # Check all board positions
+            if new_board[i] != current_board[i]:  # Find the newly made move
+                score += points_set[i]  # Add the positional value to the score
+        return score
+
+    def smart_ai(self, board): # The smart AI! Check for winning moves, then chooses the move with the highest value
+        board_key = tuple(board)
+        points = {}
+        if board_key in self.adj_list:
+            possible_moves = self.adj_list[board_key]
+            # Check for winning moves
+            for new_board_key in possible_moves:
+                new_board = list(new_board_key)
+                if self.check_win(new_board):
+                    # Return winning move if found
+                    winning_move = self.find_move(board, new_board)
+                    print(f"Winning move found at index {winning_move}")
+                    return winning_move
+
+            # No winning move, use position values to evaluate
+            for new_board_key in possible_moves:
+                new_board = list(new_board_key)
+                move_index = self.find_move(board, new_board)
+                points[move_index] = self.assign_position_value(new_board, board)
+
+            # Sort moves by their score values in descending order
+            sorted_moves = sorted(points, key=points.get, reverse=True)
+
+            # Choose the move with the highest score
+            if sorted_moves:
+                best_move = sorted_moves[0]
+                return best_move
+
+        print("No available smart moves.")
+        return None
+
+
+    def random_choice(self, board): # Slightly more efficient Dumb AI, using an adjacency list to speed up selection
         board_key = tuple(board)
         if board_key in self.adj_list:
             possible_moves = self.adj_list[board_key]
@@ -75,7 +115,7 @@ class Game:
                     return move_index
         return None
     
-    def random_search(self):
+    def random_search(self): # The Dumbest AI, completely random move after completely random move.
         current_board = list(self.board)
         path = []
 
@@ -105,8 +145,7 @@ class Game:
 
     
     def player2_move(self):
-        path = self.random_search()  # Get the path of moves
-        move = self.find_move(self.board, path[0])
+        move = self.smart_ai(self.board)
         print(move)
         return move
 

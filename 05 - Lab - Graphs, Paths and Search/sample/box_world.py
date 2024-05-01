@@ -318,8 +318,8 @@ class BoxWorld(object):
         self.path = None # invalid so remove if present
         self.graph = SparseGraph()
         # Set a heuristic cost function for the search to use
-        self.graph.cost_h = self._manhattan
-        #self.graph.cost_h = self._hypot
+        #self.graph.cost_h = self._manhattan
+        self.graph.cost_h = self._hypot
         #self.graph.cost_h = self._max
 
         nx, ny = self.nx, self.ny

@@ -50,7 +50,7 @@ Example BoxWorld map file.
 from graphics import egi
 import pyglet
 from pyglet.gl import *
-from point2d import Point2D
+from point2d import Point2D 
 from graph import SparseGraph, Node, Edge
 from searches import SEARCHES
 from math import hypot
@@ -75,7 +75,7 @@ edge_cost_matrix = [
     [None, None, None, None], # 'X <- NO edges to walls.
 ]
 
-min_edge_cost = 10.0 # must be min value for heuristic cost to work
+min_edge_cost = 1.0 # must be min value for heuristic cost to work
 
 def edge_cost(k1, k2):
     k1 = box_kind.index(k1)

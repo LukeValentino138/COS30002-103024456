@@ -78,8 +78,8 @@ class BoxWorldWindow(pyglet.window.Window):
         self.limit = 0 # unlimited.
 
         #initialize agent
-        self.agent = Agent(pos=Point2D(400, 400), radius=10)
-        # run update method at 60fps
+        agent_start_box = self.world.get_box_by_index(5, 5)  # Get a box from the world
+        self.agent = Agent(agent_start_box, radius=10)
         pyglet.clock.schedule_interval(self.update, 1.0 / 60.0)
 
 

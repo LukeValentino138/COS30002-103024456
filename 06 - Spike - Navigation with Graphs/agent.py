@@ -3,8 +3,8 @@ from math import cos, sin, pi
 from point2d import Point2D
 
 class Agent(object):
-    def __init__(self, pos=Point2D(5, 5), radius=5):
-        self.pos = pos
+    def __init__(self, pos, radius=5):
+        self.pos = pos._vc  
         self.target = None  # Initialize target as None
         self.radius = radius
 
@@ -32,3 +32,4 @@ class Agent(object):
         if self.target is not None:
             egi.red_pen()
             egi.circle(pos=self.target, radius=5, filled=True)
+

@@ -218,6 +218,12 @@ class BoxWorld(object):
         self.reset_navgraph()
         self.start = None
         self.target = None
+        self.agents = []
+
+    
+    def add_agent(self, agent):
+        '''Add an agent to the world.'''
+        self.agents.append(agent)
 
     def get_box_by_index(self, ix, iy):
         idx = (self.nx * iy) + ix
@@ -231,44 +237,47 @@ class BoxWorld(object):
         pass
 
     def draw(self):
+        # Draw boxes
         for box in self.boxes:
             box.draw()
 
+        # Draw edges if enabled
         if cfg['EDGES_ON']:
             egi.set_pen_color(name='LIGHT_BLUE')
             for node, edges in self.graph.edgelist.items():
-                # print node, edges
                 for dest in edges:
                     egi.line_by_pos(self.boxes[node]._vc, self.boxes[dest]._vc)
 
-        if self.path:
-            # put a circle in the visited boxes?
-            if cfg['BOXUSED_ON']:
-                egi.set_pen_color(name="GREEN")
-                for i in self.path.closed:
-                    egi.circle(self.boxes[i]._vc, 10)
+        # Draw paths for each agent
+        for agent in self.agents:
+            if agent.path:
+                # Draw visited boxes
+                if cfg['BOXUSED_ON']:
+                    egi.set_pen_color(name="GREEN")
+                    for i in agent.path.closed:
+                        egi.circle(self.boxes[i]._vc, 10)
 
-            if cfg['TREE_ON']:
-                egi.set_stroke(3)
-                # Show open edges
-                route = self.path.route
-                egi.set_pen_color(name='GREEN')
-                for i in self.path.open:
-                    egi.circle(self.boxes[i]._vc, 10)
-                # show the partial paths considered
-                egi.set_pen_color(name='ORANGE')
-                for i,j in route.items():
-                    egi.line_by_pos(self.boxes[i]._vc, self.boxes[j]._vc)
-                egi.set_stroke(1)
+                # Draw partial paths considered
+                if cfg['TREE_ON']:
+                    egi.set_stroke(3)
+                    route = agent.path.route
+                    egi.set_pen_color(name='GREEN')
+                    for i in agent.path.open:
+                        egi.circle(self.boxes[i]._vc, 10)
+                    egi.set_pen_color(name='ORANGE')
+                    for i, j in route.items():
+                        egi.line_by_pos(self.boxes[i]._vc, self.boxes[j]._vc)
+                    egi.set_stroke(1)
 
-            if cfg['PATH_ON']:
-                # show the final path delivered
-                egi.set_pen_color(name='RED')
-                egi.set_stroke(2)
-                path = self.path.path
-                for i in range(1,len(path)):
-                    egi.line_by_pos(self.boxes[path[i-1]]._vc, self.boxes[path[i]]._vc)
-                egi.set_stroke(1)
+                # Draw final path delivered
+                if cfg['PATH_ON']:
+                    egi.set_pen_color(name='RED')
+                    egi.set_stroke(2)
+                    path = agent.path.path
+                    for i in range(1, len(path)):
+                        egi.line_by_pos(self.boxes[path[i-1]]._vc, self.boxes[path[i]]._vc)
+                    egi.set_stroke(1)
+
 
     def resize(self, cx, cy):
         self.cx, self.cy = cx, cy # world size
@@ -308,7 +317,6 @@ class BoxWorld(object):
         x1, y1 = self.boxes[idx1].pos
         x2, y2 = self.boxes[idx2].pos
         return max(abs(x1-x2),abs(y1-y2)) * min_edge_cost
-
 
     def reset_navgraph(self):
         ''' Create and store a new nav graph for this box world configuration.
@@ -362,37 +370,38 @@ class BoxWorld(object):
             if (j+1) >= 0 and (j%nx +1) < nx:
                 self._add_edge(i, j+1, 1.4142)
 
+    # def set_start(self, idx):
+    #     '''Set the start box based on its index idx value. '''
+    #     # remove any existing start node, set new start node
+    #     if self.target == self.boxes[idx]:
+    #         print("Can't have the same start and end boxes!")
+    #         return
+    #     if self.start:
+    #         self.start.marker = None
+    #     self.start = self.boxes[idx]
+    #     self.start.marker = 'S'
 
-
-    def set_start(self, idx):
-        '''Set the start box based on its index idx value. '''
-        # remove any existing start node, set new start node
-        if self.target == self.boxes[idx]:
-            print("Can't have the same start and end boxes!")
-            return
-        if self.start:
-            self.start.marker = None
-        self.start = self.boxes[idx]
-        self.start.marker = 'S'
-
-    def set_target(self, idx):
-        '''Set the target box based on its index idx value. '''
-        # remove any existing target node, set new target node
-        if self.start == self.boxes[idx]:
-            print("Can't have the same start and end boxes!")
-            return
-        if self.target is not None:
-            self.target.marker = None
-        self.target = self.boxes[idx]
-        self.target.marker = 'T'
+    # def set_target(self, idx):
+    #     '''Set the target box based on its index idx value. '''
+    #     # remove any existing target node, set new target node
+    #     if self.start == self.boxes[idx]:
+    #         print("Can't have the same start and end boxes!")
+    #         return
+    #     if self.target is not None:
+    #         self.target.marker = None
+    #     self.target = self.boxes[idx]
+    #     self.target.marker = 'T'
 
     def plan_path(self, search, limit):
-        '''Conduct a nav-graph search from the current world start node to the
-        current target node, using a search method that matches the string
-        specified in `search`.
+        '''Conduct a nav-graph search for each agent from its start node to its
+        target node, using a search method that matches the string specified in
+        `search`.
         '''
         cls = SEARCHES[search]
-        self.path = cls(self.graph, self.start.idx, self.target.idx, limit)
+        for agent in self.agents:
+            agent.path = cls(self.graph, agent.start.idx, agent.target.idx, limit)
+            agent.path.report()
+
 
     @classmethod
     def FromFile(cls, filename, pixels=(500,500) ):
@@ -414,8 +423,6 @@ class BoxWorld(object):
         world = BoxWorld(nx, ny, cx, cy)
         # Get and set the Start and Target tiles
         s_idx, t_idx = [int(bit) for bit in lines.pop(0).split()]
-        world.set_start(s_idx)
-        world.set_target(t_idx)
         # Ready to process each line
         assert len(lines) == ny, "Number of rows doesn't match data."
         # read each line

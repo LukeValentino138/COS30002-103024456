@@ -78,11 +78,14 @@ class BoxWorldWindow(pyglet.window.Window):
         self.limit = 0 # unlimited.
 
         #initialize agent
-        agent_start_box = self.world.get_box_by_index(5, 5)  # Get a box from the world
-        self.agent = Agent(agent_start_box, radius=10)
+        agent_start_box = self.world.get_box_by_index(0, 0)
+        agent_target_box = self.world.get_box_by_index(5, 5)
+        agent1 = Agent(agent_start_box, agent_target_box)
+
+        self.world.add_agent(agent1)
+        self.world.plan_path("AStar", 0)
+
         pyglet.clock.schedule_interval(self.update, 1.0 / 60.0)
-
-
 
     def _update_label(self, key=None, text='---'):
         if key == 'mouse' or key is None:
@@ -170,27 +173,29 @@ class BoxWorldWindow(pyglet.window.Window):
                 self.plan_path()
                 self._update_label('status', 'limit=%d' % self.limit)
 
-    def plan_path(self):
-        self.world.plan_path(search_modes[self.search_mode], self.limit)
-        self._update_label('status', 'path planned')
-        print(self.world.path.report(verbose=3))
+    # def plan_path(self):
+    #     for agent in self.world.agents:
+    #         self.world.plan_path(search_modes[self.search_mode], self.limit)
+    #         self._update_label('status', 'path planned')
+    #         print(agent.path)
 
     def on_draw(self):
         self.clear()
         self.world.draw()
         if self.fps_display:
             self.fps_display.draw()
-        for key, label in list(self.labels.items()):
+        for key, label in self.labels.items():
             label.draw()
-        self.agent.render()
+        for agent in self.world.agents:
+            agent.render()
+
 
     # new method to update agent
 
     def update(self, dt):
-        target = Point2D(400, 400)
-        self.agent.set_target(target)
-        self.agent.draw_target()
-        self.agent.update(dt)
+        for agent in self.world.agents:
+            agent.update(dt)
+
 
 #==============================================================================
 
@@ -199,7 +204,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         filename = sys.argv[1]
     else:
-        filename = "map1.txt"
+        filename = r"C:\Users\Luke\OneDrive - Swinburne University\Uni\Uni2024\AIForGames\COS30002-103024456\06 - Spike - Navigation with Graphs\map2.txt"
     window = BoxWorldWindow(filename)
     pyglet.app.run()
 

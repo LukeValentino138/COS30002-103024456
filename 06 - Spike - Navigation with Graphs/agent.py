@@ -3,18 +3,17 @@ from math import cos, sin, pi
 from point2d import Point2D
 
 class Agent(object):
-    def __init__(self, pos, radius=5):
-        self.pos = pos._vc  
-        self.target = None  # Initialize target as None
-        self.radius = radius
-
-    def set_target(self, target):
+    def __init__(self, start, target):
+        self.path = None
+        self.start = start
         self.target = target
+        self.pos = start._vc
+        self.radius = 10
 
     def update(self, dt):
         if self.target is not None:
             # Calculate the direction vector from current position to the target
-            direction = self.target - self.pos
+            direction = self.target._vc - self.start._vc
             # Normalize the direction vector
             direction.normalize()
 

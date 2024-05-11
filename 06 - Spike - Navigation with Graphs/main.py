@@ -18,7 +18,7 @@ from pyglet.gl import *
 from pyglet.text import Label
 
 from box_world import BoxWorld, search_modes, cfg
-from agent import Agent
+from agent import Agent, FastAgent, SlowAgent
 from point2d import Point2D
 
 class BoxWorldWindow(pyglet.window.Window):
@@ -76,13 +76,29 @@ class BoxWorldWindow(pyglet.window.Window):
 
         # search limit
         self.limit = 0 # unlimited.
-
-        #initialize agent
+        # Initialize FastAgent and SlowAgent
         agent_start_box = self.world.get_box_by_index(0, 0)
         agent_target_box = self.world.get_box_by_index(5, 5)
-        agent1 = Agent(agent_start_box, agent_target_box)
+        fast_agent = FastAgent(agent_start_box, agent_target_box, self.world)
 
-        self.world.add_agent(agent1)
+        agent2_start_box = self.world.get_box_by_index(8, 8)
+        agent2_target_box = self.world.get_box_by_index(3, 0)
+        slow_agent = SlowAgent(agent2_start_box, agent2_target_box, self.world)
+
+        agent3_start_box = self.world.get_box_by_index(9, 0)
+        agent3_target_box = self.world.get_box_by_index(0, 9)
+        fast_agent2 = FastAgent(agent3_start_box, agent3_target_box, self.world)
+
+        agent4_start_box = self.world.get_box_by_index(9, 8)
+        agent4_target_box = self.world.get_box_by_index(1, 5)
+        slow_agent2 = SlowAgent(agent4_start_box, agent4_target_box, self.world)
+
+        self.world.add_agent(fast_agent)
+        self.world.add_agent(fast_agent2)
+        self.world.add_agent(slow_agent)
+        self.world.add_agent(slow_agent2)
+
+
         self.world.plan_path("AStar", 0)
 
         pyglet.clock.schedule_interval(self.update, 1.0 / 60.0)
@@ -191,7 +207,6 @@ class BoxWorldWindow(pyglet.window.Window):
 
 
     # new method to update agent
-
     def update(self, dt):
         for agent in self.world.agents:
             agent.update(dt)
@@ -204,7 +219,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         filename = sys.argv[1]
     else:
-        filename = r"C:\Users\Luke\OneDrive - Swinburne University\Uni\Uni2024\AIForGames\COS30002-103024456\06 - Spike - Navigation with Graphs\map2.txt"
+        filename = "map2.txt"
     window = BoxWorldWindow(filename)
     pyglet.app.run()
 

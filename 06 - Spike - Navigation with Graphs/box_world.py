@@ -97,7 +97,7 @@ cfg = {
     'CENTER_ON': False,
     'BOXLINES_ON': False,
     'BOXUSED_ON': False,
-    'TREE_ON': True,
+    'TREE_ON': False,
     'PATH_ON': True,
 }
 

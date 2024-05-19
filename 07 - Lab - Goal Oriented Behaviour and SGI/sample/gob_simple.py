@@ -101,28 +101,22 @@ def choose_action():
     best_action = None
     best_utility = None
     for key, value in actions.items():
-        # Note, at this point:
-        #  - "key" is the action as a string,
-        #  - "value" is a dict of goal changes (see line 35)
-
         # Does this action change the "best goal" we need to change?
         if best_goal in value:
+            # Calculate the utility of this action for the best goal
+            current_utility = action_utility(key, best_goal)
 
             # Do we currently have a "best action" to try? If not, use this one
             if best_action is None:
-                pass
-                ### 1. store the "key" as the current best_action
-                ### ...
-                ### 2. use the "action_utility" function to find the best_utility value of this best_action
-                ### ...
+                best_action = key  # Store the current action key as the best action
+                best_utility = current_utility  # Store the utility value as the best utility
 
             # Is this new action better than the current action?
             else:
-                pass
-                ### 1. use the "action_utility" function to find the utility value of this action
-                ### ...
-                ### 2. If it's the best action to take (utility > best_utility), keep it! (utility and action)
-                ### ...
+                # If this action's utility is greater than the best utility found so far
+                if current_utility > best_utility:
+                    best_action = key  # Update the best action
+                    best_utility = current_utility  # Update the best utility
 
     # Return the "best action"
     return best_action

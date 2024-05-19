@@ -517,7 +517,8 @@ if __name__ == '__main__':
         # usually two players (what maps expect) but can have more
         'players': [
             'OneMove',
-            'Blanko'
+            'Blanko',
+            'Rando'
             #'PingPong',
         ],
         # start / stop conditions

@@ -52,7 +52,6 @@ COLOR_NAMES = {
 def to_rgb(a_gl_color):
     return tuple([int(x * 255) for x in a_gl_color])
 
-
 # convert 0..1.0 values to 0..255 values
 COLOR_NAMES = {k: to_rgb(v) for k, v in COLOR_NAMES.items()}
 
@@ -100,7 +99,7 @@ class ScreenPlanet:
 
     def _check_update_radii(self):
         # radii are scaled and based on "growth rate" (planet size), and "vision radius"
-        # ratio is essentially a scaling factor. If window is resizedm this changes
+        # ratio is essentially a scaling factor. If window is resized, this changes
         is_change = False
         if self._cache['ratio'] != self.adaptor.ratio: is_change = True
         if self._cache['growth_rate'] != self.planet.growth_rate: is_change = True
@@ -124,8 +123,11 @@ class ScreenPlanet:
     def update(self, planet, view_id, view_mode):
         self.planet = planet
         # prep vars
-        self.color = COLOR[self.planet.owner_id]
+        self.color = COLOR[self.planet.owner_id][:3]  # Ensure RGB
         pos = self.adaptor.game_to_screen(self.planet.x, self.planet.y)
+
+        # Ensure BORDER_COLOR is also RGB
+        border_color = self.BORDER_COLOR[:3]
 
         # check for any changes ...
         do_update = False
@@ -139,7 +141,7 @@ class ScreenPlanet:
 
         # recreate shapes to draw in batch?
         if do_update:
-            # print("planet changed:", self.planet.id)
+            print("self.color:", self.color)  # Debugging line to check the color value
             # background circle
             if not self.circle:
                 self.circle = shapes.Circle(
@@ -148,10 +150,10 @@ class ScreenPlanet:
                 self.circle.x, self.circle.y = pos  # can be updated
                 self.circle.color = self.color
 
-            # circle border (arc, default 360 == cirlce)
+            # circle border (arc, default 360 == circle)
             if not self.border:
                 self.border = shapes.Arc(
-                    x=pos[0], y=pos[1], radius=int(self.radius), color=self.BORDER_COLOR, batch=self.adaptor.batch)
+                    x=pos[0], y=pos[1], radius=int(self.radius), color=border_color, batch=self.adaptor.batch)
             else:
                 self.border.x, self.border.y = pos
 
@@ -160,7 +162,7 @@ class ScreenPlanet:
                 if not self.view_circle:
                     self.view_circle = shapes.Circle(
                         x=pos[0], y=pos[1], radius=int(self.view_radius),
-                        color=self.VISION_COLOR, batch=self.adaptor.batch_vision)
+                        color=self.VISION_COLOR[:3], batch=self.adaptor.batch_vision)
                 else:
                     self.view_circle.x, self.view_circle.y = pos
                 self.view_circle.visible = True
@@ -229,7 +231,7 @@ class ScreenFleet:
     def update(self, fleet, view_id, view_mode):
         # prep vars
         self.fleet = fleet
-        self.color = COLOR[fleet.owner_id]
+        self.color = COLOR[fleet.owner_id][:3]  # Ensure RGB
         self.view_color = tuple([int(v / 2) for v in self.color[:3]] + [150])
         pos = self.adaptor.game_to_screen(fleet.x, fleet.y)
 
@@ -271,7 +273,7 @@ class ScreenFleet:
                 if not self.view_circle:
                     self.view_circle = shapes.Circle(
                         x=pos[0], y=pos[1], radius=int(self.view_radius),
-                        color=self.view_color, batch=self.adaptor.batch_vision)
+                        color=self.view_color[:3], batch=self.adaptor.batch_vision)
                 else:
                     self.view_circle.x, self.view_circle.y = pos
             else:
@@ -284,6 +286,7 @@ class ScreenFleet:
     def draw(self):
         # other shape elements are linked to a batch that is drawn.
         self.label.draw()
+
 
 
 class PlanetWarsScreenAdapter:

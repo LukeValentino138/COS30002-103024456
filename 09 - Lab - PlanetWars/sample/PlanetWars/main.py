@@ -518,7 +518,8 @@ if __name__ == '__main__':
         'players': [
             'OneMove',
             'Blanko',
-            'Rando'
+            'Rando',
+            'GOAT'
             #'PingPong',
         ],
         # start / stop conditions

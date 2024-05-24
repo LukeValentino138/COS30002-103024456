@@ -26,6 +26,8 @@ class Agent(object):
     # NOTE: Class Object (not *instance*) variables!
     DECELERATION_SPEEDS = {
         'slow': 0.9,
+        'normal': 0.5,
+        'fast': 0.1
         ### ADD 'normal' and 'fast' speeds here
     }
 
@@ -59,18 +61,19 @@ class Agent(object):
             accel = self.seek(self.world.target)
         elif mode == 'arrive_slow':
             accel = self.arrive(self.world.target, 'slow')
-##        elif mode == 'arrive_normal':
-##            force = self.arrive(self.world.target, 'normal')
-##        elif mode == 'arrive_fast':
-##            force = self.arrive(self.world.target, 'fast')
+        elif mode == 'arrive_normal':
+            accel = self.arrive(self.world.target, 'normal')
+        elif mode == 'arrive_fast':
+            accel = self.arrive(self.world.target, 'fast')
         elif mode == 'flee':
             accel = self.flee(self.world.target)
-##        elif mode == 'pursuit':
-##            force = self.pursuit(self.world.hunter)
+    ##        elif mode == 'pursuit':
+    ##            force = self.pursuit(self.world.hunter)
         else:
             accel = Vector2D()
         self.acceleration = accel
         return accel
+
 
     def update(self, delta):
         ''' update vehicle position and orientation '''

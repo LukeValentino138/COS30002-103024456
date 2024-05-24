@@ -111,7 +111,9 @@ class Agent(object):
         ''' move away from hunter position '''
 ## add panic distance (second)
 ## add flee calculations (first)
-        return Vector2D()
+        desired_vel = (self.pos - hunter_pos).normalise() * self.max_speed
+        return (desired_vel - self.vel)
+
 
     def arrive(self, target_pos, speed):
         ''' this behaviour is similar to seek() but it attempts to arrive at

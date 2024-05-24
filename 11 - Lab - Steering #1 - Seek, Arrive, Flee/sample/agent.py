@@ -111,8 +111,11 @@ class Agent(object):
         ''' move away from hunter position '''
 ## add panic distance (second)
 ## add flee calculations (first)
-        desired_vel = (self.pos - hunter_pos).normalise() * self.max_speed
-        return (desired_vel - self.vel)
+        panic_range_sq = 10000
+        if self.pos.distanceSq(hunter_pos) < panic_range_sq:
+                desired_vel = (self.pos - hunter_pos).normalise() * self.max_speed
+                return (desired_vel - self.vel)
+        return Vector2D()
 
 
     def arrive(self, target_pos, speed):

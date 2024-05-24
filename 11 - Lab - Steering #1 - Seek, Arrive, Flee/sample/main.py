@@ -39,6 +39,8 @@ def on_key_press(symbol, modifiers):
     elif symbol in AGENT_MODES:
         for agent in world.agents:
             agent.mode = AGENT_MODES[symbol]
+    elif symbol == KEY._7:
+        world.agents.append(Agent(world))
 
 
 def on_resize(cx, cy):

@@ -28,11 +28,11 @@ def on_key_press(symbol, modifiers):
     elif symbol in AGENT_MODES:
         for agent in world.agents:
             agent.mode = AGENT_MODES[symbol]
-    ## LAB 08 STEP 2: Add agent by pressing a key
-    # ...
-
-    ## LAB 09 STEP 1: Reset all paths to new random ones
-    # ...
+    elif symbol == KEY.A:
+        world.agents.append(Agent(world))
+    elif symbol == KEY.R:
+        for agent in world.agents:
+            agent.randomise_path()
 
     # Toggle debug force line info on the agent
     elif symbol == KEY.I:

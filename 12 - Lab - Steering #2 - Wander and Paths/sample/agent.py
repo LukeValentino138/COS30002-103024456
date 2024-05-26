@@ -212,10 +212,6 @@ class Agent(object):
         ## OPTIONAL EXTRA... pursuit (you'll need something to pursue!)
         return Vector2D()
 
-    def wander(self, delta):
-        ''' Random wandering using a projected jitter circle. '''
-        return Vector2D()
-
     def randomise_path(self):
         cx = self.world.cx # width
         cy = self.world.cy # height
@@ -230,6 +226,7 @@ class Agent(object):
             if self.pos.distanceSq(self.path.current_pt()) < self.waypoint_threshold ** 2:
                 self.path.inc_current_pt()
             return self.arrive(self.path.current_pt(), 'slow')
+        
     def wander(self, delta):
         ''' random wandering using a projected jitter circle '''
         wt = self.wander_target

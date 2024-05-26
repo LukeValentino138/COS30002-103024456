@@ -56,11 +56,9 @@ class Agent(object):
             Point2D( 1.0,  0.0),
             Point2D(-1.0, -0.6)
         ]
-        ### path to follow?
-        # self.path = ??
-
-        ### wander details
-        # self.wander_?? ...
+        self.path = Path()
+        self.randomise_path()
+        self.waypoint_threshold = 0.0 
 
         # limits?
         self.max_speed = 20.0 * scale
@@ -196,3 +194,13 @@ class Agent(object):
     def wander(self, delta):
         ''' Random wandering using a projected jitter circle. '''
         return Vector2D()
+
+    def randomise_path(self):
+        cx = self.world.cx # width
+        cy = self.world.cy # height
+        margin = min(cx, cy) * (1/6) # use this for padding in the next line ...
+        length = 10
+        self.path.create_random_path(length, margin, margin, cx, cy ) 
+    
+    def follow_path(self):
+        return

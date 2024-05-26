@@ -29,9 +29,9 @@ class Agent(object):
     # NOTE: Class Object (not *instance*) variables!
     DECELERATION_SPEEDS = {
         'slow': 0.9,
+        'normal': 0.5,
+        'fast': 0.1
         ### ADD 'normal' and 'fast' speeds here
-        # ...
-        # ...
     }
 
     def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek'):
@@ -161,9 +161,11 @@ class Agent(object):
     def flee(self, hunter_pos):
         ''' move away from hunter position '''
         ## add panic distance (second)
-        # ...
         ## add flee calculations (first)
-        # ...
+        panic_range_sq = 10000
+        if self.pos.distanceSq(hunter_pos) < panic_range_sq:
+                desired_vel = (self.pos - hunter_pos).normalise() * self.max_speed
+                return (desired_vel - self.vel)
         return Vector2D()
 
     def arrive(self, target_pos, speed):
@@ -193,5 +195,4 @@ class Agent(object):
 
     def wander(self, delta):
         ''' Random wandering using a projected jitter circle. '''
-        ## ...
         return Vector2D()

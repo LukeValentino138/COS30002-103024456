@@ -58,7 +58,7 @@ class Agent(object):
         ]
         self.path = Path()
         self.randomise_path()
-        self.waypoint_threshold = 0.0 
+        self.waypoint_threshold = 40.0 
 
         # limits?
         self.max_speed = 20.0 * scale
@@ -82,8 +82,8 @@ class Agent(object):
             force = self.flee(self.world.target)
         elif mode == 'pursuit':
             force = self.pursuit(self.world.hunter)
-        elif mode == 'wander':
-            force = self.wander(delta)
+        # elif mode == 'wander':
+        #     force = self.wander(delta)
         elif mode == 'follow_path':
             force = self.follow_path()
         else:
@@ -107,7 +107,7 @@ class Agent(object):
         # update position
         self.pos += self.vel * delta
         # update heading is non-zero velocity (moving)
-        if self.vel.length_sq() > 0.00000001:
+        if self.vel.lengthSq() > 0.00000001:
             self.heading = self.vel.get_normalised()
             self.side = self.heading.perp()
         # treat world as continuous space - wrap new position if needed
@@ -117,7 +117,7 @@ class Agent(object):
         ''' Draw the triangle agent with color'''
         # draw the path if it exists and the mode is follow
         if self.mode == 'follow_path':
-            ## ...
+            self.path.render()
             pass
 
         # draw the ship
@@ -160,8 +160,8 @@ class Agent(object):
         ''' move away from hunter position '''
         ## add panic distance (second)
         ## add flee calculations (first)
-        panic_range_sq = 10000
-        if self.pos.distanceSq(hunter_pos) < panic_range_sq:
+        panic_range_sq = 100
+        if self.pos.distanceSq(hunter_pos) < panic_range_sq ** 2:
                 desired_vel = (self.pos - hunter_pos).normalise() * self.max_speed
                 return (desired_vel - self.vel)
         return Vector2D()
@@ -200,7 +200,12 @@ class Agent(object):
         cy = self.world.cy # height
         margin = min(cx, cy) * (1/6) # use this for padding in the next line ...
         length = 10
-        self.path.create_random_path(length, margin, margin, cx, cy ) 
+        self.path.create_random_path(length, margin, margin, cx - margin, cy - margin, looped=True ) 
     
     def follow_path(self):
-        return
+        if self.path.is_finished():
+            return self.arrive(self.path.current_pt(), 'slow')
+        else:
+            if self.pos.distanceSq(self.path.current_pt()) < self.waypoint_threshold ** 2:
+                self.path.inc_current_pt()
+            return self.arrive(self.path.current_pt(), 'slow')

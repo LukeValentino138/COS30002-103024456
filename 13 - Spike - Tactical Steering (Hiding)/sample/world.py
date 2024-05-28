@@ -18,6 +18,7 @@ class World(object):
         self.cy = cy
         self.target = Vector2D(cx / 2, cy / 2)
         self.hunter = None
+        self.prey = None
         self.agents = []
         self.objects = []
         self.paused = True

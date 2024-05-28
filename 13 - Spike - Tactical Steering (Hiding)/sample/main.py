@@ -16,6 +16,8 @@ from vector2d import Vector2D
 from world import World
 from agent import Agent, AGENT_MODES  # Agent with seek, arrive, flee and pursuit
 from object import Object
+from hunter import Hunter
+from prey import Prey
 
 
 def on_mouse_press(x, y, button, modifiers):
@@ -64,11 +66,17 @@ if __name__ == '__main__':
 
     # create a world for agents
     world = World(500, 500)
+
+    hunter = Hunter(world)
+    world.agents.append(hunter)
+    world.hunter = hunter  # Set the hunter in the world for prey to access
+
+    # Add a prey
+    prey = Prey(world)
+    world.agents.append(prey)
+
     # add objects
     world.objects.append(Object(Vector2D(150,150), 20))
-
-    # add one agent
-    world.agents.append(Agent(world))
     # unpause the world ready for movement
     world.paused = False
 

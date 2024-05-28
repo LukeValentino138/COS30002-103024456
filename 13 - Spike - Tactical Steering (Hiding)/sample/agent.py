@@ -22,6 +22,7 @@ AGENT_MODES = {
     KEY._6: 'pursuit',
     KEY._7: 'follow_path',
     KEY._8: 'wander',
+    KEY._9: 'evade'
 }
 
 class Agent(object):
@@ -74,28 +75,30 @@ class Agent(object):
         self.show_info = False
 
     def calculate(self, delta):
-        # calculate the current steering force
-        mode = self.mode
-        if mode == 'seek':
-            force = self.seek(self.world.target)
-        elif mode == 'arrive_slow':
-            force = self.arrive(self.world.target, 'slow')
-        elif mode == 'arrive_normal':
-            force = self.arrive(self.world.target, 'normal')
-        elif mode == 'arrive_fast':
-            force = self.arrive(self.world.target, 'fast')
-        elif mode == 'flee':
-            force = self.flee(self.world.target)
-        elif mode == 'pursuit':
-            force = self.pursuit(self.world.hunter)
-        elif mode == 'wander':
-            force = self.wander(delta)
-        elif mode == 'follow_path':
-            force = self.follow_path()
-        else:
-            force = Vector2D()
-        self.force = force
-        return force
+            # calculate the current steering force
+            mode = self.mode
+            if mode == 'seek':
+                force = self.seek(self.world.target)
+            elif mode == 'arrive_slow':
+                force = self.arrive(self.world.target, 'slow')
+            elif mode == 'arrive_normal':
+                force = self.arrive(self.world.target, 'normal')
+            elif mode == 'arrive_fast':
+                force = self.arrive(self.world.target, 'fast')
+            elif mode == 'flee':
+                force = self.flee(self.world.target)
+            elif mode == 'pursuit':
+                force = self.pursuit(self.world.hunter)
+            elif mode == 'evade':
+                force = self.Evade(self.world.hunter)
+            elif mode == 'wander':
+                force = self.wander(delta)
+            elif mode == 'follow_path':
+                force = self.follow_path()
+            else:
+                force = Vector2D()
+            self.force = force
+            return force
 
     def update(self, delta):
         ''' update vehicle position and orientation '''
@@ -246,3 +249,9 @@ class Agent(object):
         wld_target = self.world.transform_point(target, self.pos, self.heading, self.side)
         # and steer towards it
         return self.seek(wld_target)
+
+    def evade(self, pursuer):
+        toPursuer = pursuer.pos - self.pos
+        lookAheadTime = toPursuer.length() / (self.max_speed + pursuer.speed())
+        futurePosition = pursuer.pos + pursuer.vel * lookAheadTime
+        return self.flee(futurePosition)

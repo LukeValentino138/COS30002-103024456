@@ -77,6 +77,9 @@ if __name__ == '__main__':
 
     # add objects
     world.objects.append(Object(Vector2D(150,150), 20))
+    world.objects.append(Object(Vector2D(350,120), 60))
+    world.objects.append(Object(Vector2D(85,400), 20))
+    world.objects.append(Object(Vector2D(300,300), 50))
     # unpause the world ready for movement
     world.paused = False
 

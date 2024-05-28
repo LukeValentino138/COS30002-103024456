@@ -33,13 +33,27 @@ class World(object):
         for agent in self.agents:
             agent.render()
 
-        for obj in self.objects:
-            obj.render()
+        if self.hunter:
+            hunter_pos = self.hunter.pos
+            for obj in self.objects:
+                hiding_spot = self.GetHidingPosition(hunter_pos, obj.position, obj.radius)
+                
+                obj.render()
 
+                # draw line from hunter to object
+                egi.blue_pen()
+                egi.line(hunter_pos.x, hunter_pos.y, obj.position.x, obj.position.y)
+                
+                # draw line from object to hiding spot
+                egi.line(obj.position.x, obj.position.y, hiding_spot.x, hiding_spot.y)
+                
+                # mark the hiding spot with an X
+                egi.cross(hiding_spot, 5)
+        
         if self.target:
             egi.red_pen()
             egi.cross(self.target, 10)
-        
+
         if self.show_info:
             infotext = ', '.join(set(agent.mode for agent in self.agents))
             egi.white_pen()
@@ -90,3 +104,14 @@ class World(object):
         mat.transform_vector2d(wld_pt)
         # done
         return wld_pt
+    
+    def GetHidingPosition(self, hunter_pos, obj_pos, obj_radius):
+        # set the distance between the object and the hiding point
+        DistFromBoundary = 30.0
+        DistAway = obj_radius + DistFromBoundary
+
+        ToObj = (obj_pos - hunter_pos).normalise()
+
+        hiding_position = (ToObj * DistAway) + obj_pos
+        return hiding_position
+

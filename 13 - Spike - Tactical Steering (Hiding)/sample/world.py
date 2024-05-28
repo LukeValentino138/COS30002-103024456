@@ -19,6 +19,7 @@ class World(object):
         self.target = Vector2D(cx / 2, cy / 2)
         self.hunter = None
         self.agents = []
+        self.objects = []
         self.paused = True
         self.show_info = True
 
@@ -31,10 +32,13 @@ class World(object):
         for agent in self.agents:
             agent.render()
 
+        for obj in self.objects:
+            obj.render()
+
         if self.target:
             egi.red_pen()
             egi.cross(self.target, 10)
-
+        
         if self.show_info:
             infotext = ', '.join(set(agent.mode for agent in self.agents))
             egi.white_pen()

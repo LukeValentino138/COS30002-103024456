@@ -15,9 +15,7 @@ from pyglet.gl import *
 from vector2d import Vector2D
 from world import World
 from agent import Agent, AGENT_MODES  # Agent with seek, arrive, flee and pursuit
-from object import Object
-from hunter import Hunter
-from prey import Prey
+import random
 
 
 def on_mouse_press(x, y, button, modifiers):
@@ -33,10 +31,18 @@ def on_key_press(symbol, modifiers):
             agent.mode = AGENT_MODES[symbol]
     elif symbol == KEY.A:
         world.agents.append(Agent(world))
-    elif symbol == KEY.R:
+    elif symbol == KEY.UP:
         for agent in world.agents:
-            agent.randomise_path()
-
+            agent.separation_amount += 0.1
+    elif symbol == KEY.DOWN:
+        for agent in world.agents:
+            agent.separation_amount -= 0.1
+    elif symbol == KEY.LEFT:
+        for agent in world.agents:
+            agent.wander_amount -= 0.1
+    elif symbol == KEY.RIGHT:
+        for agent in world.agents:
+            agent.wander_amount += 0.1
     # Toggle debug force line info on the agent
     elif symbol == KEY.I:
         for agent in world.agents:
@@ -67,19 +73,9 @@ if __name__ == '__main__':
     # create a world for agents
     world = World(500, 500)
 
-    hunter = Hunter(world)
-    world.agents.append(hunter)
-    world.hunter = hunter  # Set the hunter in the world for prey to access
+    for x in range(1):
+        world.agents.append(Agent(world))
 
-    # Add a prey
-    prey = Prey(world)
-    world.agents.append(prey)
-
-    # add objects
-    world.objects.append(Object(Vector2D(150,150), 20))
-    world.objects.append(Object(Vector2D(350,120), 60))
-    world.objects.append(Object(Vector2D(85,400), 20))
-    world.objects.append(Object(Vector2D(300,300), 50))
     # unpause the world ready for movement
     world.paused = False
 

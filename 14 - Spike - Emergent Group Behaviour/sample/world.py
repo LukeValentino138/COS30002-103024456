@@ -26,9 +26,7 @@ class World(object):
 
     def update(self, delta):
         if not self.paused:
-
-            
-
+            self.calculate_neighbours()
             for agent in self.agents:
                 agent.update(delta)
 

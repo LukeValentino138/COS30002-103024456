@@ -14,15 +14,9 @@ from random import random, randrange, uniform
 from path import Path
 
 AGENT_MODES = {
-    KEY._1: 'seek',
-    KEY._2: 'arrive_slow',
-    KEY._3: 'arrive_normal',
-    KEY._4: 'arrive_fast',
-    KEY._5: 'flee',
-    KEY._6: 'pursuit',
-    KEY._7: 'follow_path',
-    KEY._8: 'wander',
-    KEY._9: 'evade'
+    KEY._1: 'wander',
+    KEY._2: 'separation',
+    KEY._3: 'combined'
 }
 
 class Agent(object):
@@ -35,7 +29,7 @@ class Agent(object):
         ### ADD 'normal' and 'fast' speeds here
     }
 
-    def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek'):
+    def __init__(self, world=None, scale=30.0, mass=1.0, mode='wander'):
         # keep a reference to the world object
         self.world = world
         self.mode = mode
@@ -47,7 +41,7 @@ class Agent(object):
         self.side = self.heading.perp()
         self.scale = Vector2D(scale, scale)  # easy scaling of agent size
         self.force = Vector2D()  # current steering force
-        self.accel = Vector2D() # current acceleration due to force
+        self.accel = Vector2D()  # current acceleration due to force
         self.mass = mass
 
         # data for drawing this agent
@@ -57,9 +51,7 @@ class Agent(object):
             Point2D( 1.0,  0.0),
             Point2D(-1.0, -0.6)
         ]
-        self.path = Path()
-        self.randomise_path()
-        self.waypoint_threshold = 40.0 
+        self.waypoint_threshold = 40.0
 
         # NEW WANDER INFO
         self.wander_target = Vector2D(1, 0)
@@ -67,46 +59,43 @@ class Agent(object):
         self.wander_radius = 1.0 * scale
         self.wander_jitter = 10.0 * scale
         self.bRadius = scale
-        # Force and speed limiting code
-        self.max_speed = 20.0 * scale
+        self.max_speed = 5.0 * scale
         self.max_force = 500.0
 
-        #SPIKE 14 NEIGHBOURS
+        # SPIKE 14 NEIGHBOURS
         self.neighbours = []
-        self.neighbour_radius = 50.0
+        self.neighbour_radius = 100.0
+
+        # Parameters for steering behaviors
+        self.wander_amount = 20.0
+        self.separation_amount = 75.0
 
         # debug draw info?
         self.show_info = False
 
     def calculate(self, delta):
-            # calculate the current steering force
-            mode = self.mode
-            if mode == 'seek':
-                force = self.seek(self.world.target)
-            elif mode == 'arrive_slow':
-                force = self.arrive(self.world.target, 'slow')
-            elif mode == 'arrive_normal':
-                force = self.arrive(self.world.target, 'normal')
-            elif mode == 'arrive_fast':
-                force = self.arrive(self.world.target, 'fast')
-            elif mode == 'flee':
-                force = self.flee(self.world.target)
-            elif mode == 'pursuit':
-                force = self.pursuit(self.world.hunter)
-            elif mode == 'evade':
-                force = self.Evade(self.world.hunter)
-            elif mode == 'wander':
-                force = self.wander(delta)
-            elif mode == 'follow_path':
-                force = self.follow_path()
-            else:
-                force = Vector2D()
+        # Initialize the steering force
+        SteeringForce = Vector2D()
+
+        if self.mode == 'wander':
+            # Apply Wander behavior
+            SteeringForce += self.wander(delta) * self.wander_amount
+
+        elif self.mode == 'separation':
+            # Apply Separation behavior
+            SteeringForce += self.separation(self.neighbours) * self.separation_amount
+
+        elif self.mode == 'combined':
+            # Apply both behaviors with weighted sum
+            SteeringForce += self.wander(delta) * self.wander_amount
+            SteeringForce += self.separation(self.neighbours) * self.separation_amount
+
+        # Truncate the steering force to the maximum allowed
+        SteeringForce.truncate(self.max_force)
+
+        return SteeringForce
 
 
-
-
-            self.force = force
-            return force
 
     def update(self, delta):
         ''' update vehicle position and orientation '''
@@ -145,11 +134,6 @@ class Agent(object):
         # draw it!
         egi.closed_shape(pts)
 
-        # draw wander info?
-        if self.mode == 'wander':
-            ## ...
-            pass
-
         # add some handy debug drawing info lines - force and velocity
         if self.show_info:
             s = 0.5 # <-- scaling factor
@@ -164,8 +148,7 @@ class Agent(object):
             egi.line_with_arrow(self.pos+self.vel * s, self.pos+ (self.force+self.vel) * s, 5)
             egi.line_with_arrow(self.pos, self.pos+ (self.force+self.vel) * s, 5)
 
-
-        if self.mode == 'wander':
+        if self.mode == 'wander' or self.mode == 'combined':
             # calculate the center of the wander circle in front of the agent
             wnd_pos = Vector2D(self.wander_dist, 0)
             wld_pos = self.world.transform_point(wnd_pos, self.pos, self.heading, self.side)
@@ -192,61 +175,22 @@ class Agent(object):
                 gap = radius + bot.bRadius
                 if to.lengthSq() < gap**2:
                     self.neighbours.append(bot)
+    
+    def separation(self, group):
+        SteeringForce = Vector2D()
+        for bot in group:
+            # Don’t include self, only include neighbors (already tagged)
+            if bot != self and bot in self.neighbours:
+                ToBot = self.pos - bot.pos
+                # Scale based on inverse distance to neighbor
+                if ToBot.lengthSq() > 0:  # Avoid division by zero
+                    SteeringForce += ToBot.normalise() / ToBot.length()
+        return SteeringForce
 
     def seek(self, target_pos):
         ''' move towards target position '''
         desired_vel = (target_pos - self.pos).normalise() * self.max_speed
         return (desired_vel - self.vel)
-
-    def flee(self, hunter_pos):
-        ''' move away from hunter position '''
-        ## add panic distance (second)
-        ## add flee calculations (first)
-        panic_range_sq = 100
-        if self.pos.distanceSq(hunter_pos) < panic_range_sq ** 2:
-                desired_vel = (self.pos - hunter_pos).normalise() * self.max_speed
-                return (desired_vel - self.vel)
-        return Vector2D()
-
-    def arrive(self, target_pos, speed):
-        ''' this behaviour is similar to seek() but it attempts to arrive at
-            the target position with a zero velocity'''
-        decel_rate = self.DECELERATION_SPEEDS[speed]
-        to_target = target_pos - self.pos
-        dist = to_target.length()
-        if dist > 0:
-            # calculate the speed required to reach the target given the
-            # desired deceleration rate
-            speed = dist / decel_rate
-            # make sure the velocity does not exceed the max
-            speed = min(speed, self.max_speed)
-            # from here proceed just like Seek except we don't need to
-            # normalize the to_target vector because we have already gone to the
-            # trouble of calculating its length for dist.
-            desired_vel = to_target * (speed / dist)
-            return (desired_vel - self.vel)
-        return Vector2D(0, 0)
-
-    def pursuit(self, evader):
-        ''' this behaviour predicts where an agent will be in time T and seeks
-            towards that point to intercept it. '''
-        ## OPTIONAL EXTRA... pursuit (you'll need something to pursue!)
-        return Vector2D()
-
-    def randomise_path(self):
-        cx = self.world.cx # width
-        cy = self.world.cy # height
-        margin = min(cx, cy) * (1/6) # use this for padding in the next line ...
-        length = 10
-        self.path.create_random_path(length, margin, margin, cx - margin, cy - margin, looped=True ) 
-    
-    def follow_path(self):
-        if self.path.is_finished():
-            return self.arrive(self.path.current_pt(), 'slow')
-        else:
-            if self.pos.distanceSq(self.path.current_pt()) < self.waypoint_threshold ** 2:
-                self.path.inc_current_pt()
-            return self.arrive(self.path.current_pt(), 'slow')
         
     def wander(self, delta):
         ''' random wandering using a projected jitter circle '''
@@ -268,8 +212,4 @@ class Agent(object):
         # and steer towards it
         return self.seek(wld_target)
 
-    def evade(self, pursuer):
-        toPursuer = pursuer.pos - self.pos
-        lookAheadTime = toPursuer.length() / (self.max_speed + pursuer.speed())
-        futurePosition = pursuer.pos + pursuer.vel * lookAheadTime
-        return self.flee(futurePosition)
+

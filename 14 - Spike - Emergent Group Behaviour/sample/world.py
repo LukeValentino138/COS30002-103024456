@@ -23,6 +23,7 @@ class World(object):
         self.objects = []
         self.paused = True
         self.show_info = True
+        self.selected_param = 'wander'
 
     def update(self, delta):
         if not self.paused:
@@ -37,12 +38,15 @@ class World(object):
         if self.target:
             egi.red_pen()
             egi.cross(self.target, 10)
-
         if self.show_info:
-                    infotext = ', '.join(set(agent.mode for agent in self.agents))
-                    infotext += f" | Separation: {self.agents[0].separation_amount:.2f}"
-                    egi.white_pen()
-                    egi.text_at_pos(0, 0, infotext)
+                infotext = ', '.join(set(agent.mode for agent in self.agents))
+                infotext += f" | Wander: {self.agents[0].wander_amount:.2f}"
+                infotext += f" | Separation: {self.agents[0].separation_amount:.2f}"
+                infotext += f" | Alignment: {self.agents[0].alignment_amount:.2f}"
+                infotext += f" | Cohesion: {self.agents[0].cohesion_amount:.2f}"
+                infotext += f" | Selected Parameter: {self.selected_param}"
+                egi.white_pen()
+                egi.text_at_pos(10, self.cy - 20, infotext)  # Position text at the top of the screen
 
     def calculate_neighbours(self):
         for agent in self.agents:

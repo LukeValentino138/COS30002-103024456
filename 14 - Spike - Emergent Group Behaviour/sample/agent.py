@@ -61,16 +61,18 @@ class Agent(object):
         self.wander_radius = 1.0 * scale
         self.wander_jitter = 10.0 * scale
         self.bRadius = scale
-        self.max_speed = 20.0 * scale
+        self.max_speed = 10.0 * scale
         self.max_force = 500.0
 
         # SPIKE 14 NEIGHBOURS
         self.neighbours = []
-        self.neighbour_radius = 100.0
+        self.neighbour_radius = 200.0
 
         # Parameters for steering behaviors
         self.wander_amount = 1.0
         self.separation_amount = 75.0
+        self.alignment_amount = 100.0
+        self.cohesion_amount = 50.0
 
         # debug draw info?
         self.show_info = False
@@ -86,21 +88,21 @@ class Agent(object):
         elif self.mode == 'separation':
             # Apply Separation behavior
             SteeringForce += self.separation(self.neighbours) * self.separation_amount
-        
+
         elif self.mode == 'alignment':
             # Apply Alignment behavior
-            SteeringForce += self.alignment(self.neighbours)
+            SteeringForce += self.alignment(self.neighbours) * self.alignment_amount
 
         elif self.mode == 'cohesion':
             # Apply Cohesion behavior
-            SteeringForce += self.cohesion(self.neighbours)
+            SteeringForce += self.cohesion(self.neighbours) * self.cohesion_amount
 
         elif self.mode == 'combined':
-            # Apply both behaviors with weighted sum
+            # Apply all behaviors with weighted sum
             SteeringForce += self.wander(delta) * self.wander_amount
             SteeringForce += self.separation(self.neighbours) * self.separation_amount
-            SteeringForce += self.alignment(self.neighbours)
-            SteeringForce += self.cohesion(self.neighbours)
+            SteeringForce += self.alignment(self.neighbours) * self.alignment_amount
+            SteeringForce += self.cohesion(self.neighbours) * self.cohesion_amount
 
         # Truncate the steering force to the maximum allowed
         SteeringForce.truncate(self.max_force)

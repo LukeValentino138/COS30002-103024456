@@ -17,6 +17,12 @@ from world import World
 from agent import Agent, AGENT_MODES  # Agent with seek, arrive, flee and pursuit
 import random
 
+PARAMETER_KEYS = {
+    KEY.F1: 'wander',
+    KEY.F2: 'separation',
+    KEY.F3: 'alignment',
+    KEY.F4: 'cohesion'
+}
 
 def on_mouse_press(x, y, button, modifiers):
     if button == 1:  # left
@@ -29,26 +35,28 @@ def on_key_press(symbol, modifiers):
     elif symbol in AGENT_MODES:
         for agent in world.agents:
             agent.mode = AGENT_MODES[symbol]
+    elif symbol in PARAMETER_KEYS:
+        world.selected_param = PARAMETER_KEYS[symbol]
+    elif symbol == KEY.UP:
+        adjust_parameter(world.agents, world.selected_param, 1)
+    elif symbol == KEY.DOWN:
+        adjust_parameter(world.agents, world.selected_param, -1)
     elif symbol == KEY.A:
         world.agents.append(Agent(world))
-    elif symbol == KEY.UP:
-        for agent in world.agents:
-            agent.separation_amount += 0.1
-    elif symbol == KEY.DOWN:
-        for agent in world.agents:
-            agent.separation_amount -= 0.1
-    elif symbol == KEY.LEFT:
-        for agent in world.agents:
-            agent.wander_amount -= 0.1
-    elif symbol == KEY.RIGHT:
-        for agent in world.agents:
-            agent.wander_amount += 0.1
-    # Toggle debug force line info on the agent
     elif symbol == KEY.I:
         for agent in world.agents:
             agent.show_info = not agent.show_info
 
-
+def adjust_parameter(agents, param, amount):
+    for agent in agents:
+        if param == 'wander':
+            agent.wander_amount += amount
+        elif param == 'separation':
+            agent.separation_amount += amount
+        elif param == 'alignment':
+            agent.alignment_amount += amount
+        elif param == 'cohesion':
+            agent.cohesion_amount += amount
 
 def on_resize(cx, cy):
     world.cx = cx
@@ -58,7 +66,7 @@ def on_resize(cx, cy):
 if __name__ == '__main__':
 
     # create a pyglet window and set glOptions
-    win = window.Window(width=500, height=500, vsync=True, resizable=True)
+    win = window.Window(width=1000, height=1000, vsync=True, resizable=True)
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     # needed so that egi knows where to draw
@@ -71,9 +79,9 @@ if __name__ == '__main__':
     win.push_handlers(on_resize)
 
     # create a world for agents
-    world = World(500, 500)
+    world = World(1000, 1000)
 
-    for x in range(1):
+    for x in range(5):
         world.agents.append(Agent(world))
 
     # unpause the world ready for movement

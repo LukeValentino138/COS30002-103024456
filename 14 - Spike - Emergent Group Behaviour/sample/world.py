@@ -26,6 +26,9 @@ class World(object):
 
     def update(self, delta):
         if not self.paused:
+
+            
+
             for agent in self.agents:
                 agent.update(delta)
 
@@ -58,6 +61,11 @@ class World(object):
             infotext = ', '.join(set(agent.mode for agent in self.agents))
             egi.white_pen()
             egi.text_at_pos(0, 0, infotext)
+
+    def calculate_neighbours(self):
+        for agent in self.agents:
+            agent.TagNeighbours(self.agents, self.agent.neighbour_radius)
+
 
     def wrap_around(self, pos):
         ''' Treat world as a toroidal space. Updates parameter object pos '''

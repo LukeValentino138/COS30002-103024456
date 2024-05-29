@@ -71,6 +71,10 @@ class Agent(object):
         self.max_speed = 20.0 * scale
         self.max_force = 500.0
 
+        #SPIKE 14 NEIGHBOURS
+        self.neighbours = []
+        self.neighbour_radius = 50.0
+
         # debug draw info?
         self.show_info = False
 
@@ -97,6 +101,10 @@ class Agent(object):
                 force = self.follow_path()
             else:
                 force = Vector2D()
+
+
+
+
             self.force = force
             return force
 
@@ -174,6 +182,16 @@ class Agent(object):
         return self.vel.length()
 
     #--------------------------------------------------------------------------
+
+    def TagNeighbours(self, bots, radius):
+        """ Tag neighbours within a given radius """
+        self.neighbours = []
+        for bot in bots:
+            if bot != self:
+                to = self.pos - bot.pos
+                gap = radius + bot.bRadius
+                if to.lengthSq() < gap**2:
+                    self.neighbours.append(bot)
 
     def seek(self, target_pos):
         ''' move towards target position '''

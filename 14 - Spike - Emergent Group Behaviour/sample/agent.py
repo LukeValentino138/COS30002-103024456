@@ -17,7 +17,8 @@ AGENT_MODES = {
     KEY._1: 'wander',
     KEY._2: 'separation',
     KEY._3: 'alignment',
-    KEY._4: 'combined'
+    KEY._4: 'cohesion',
+    KEY._5: 'combined'
 }
 
 class Agent(object):
@@ -60,7 +61,7 @@ class Agent(object):
         self.wander_radius = 1.0 * scale
         self.wander_jitter = 10.0 * scale
         self.bRadius = scale
-        self.max_speed = 5.0 * scale
+        self.max_speed = 20.0 * scale
         self.max_force = 500.0
 
         # SPIKE 14 NEIGHBOURS
@@ -90,11 +91,16 @@ class Agent(object):
             # Apply Alignment behavior
             SteeringForce += self.alignment(self.neighbours)
 
+        elif self.mode == 'cohesion':
+            # Apply Cohesion behavior
+            SteeringForce += self.cohesion(self.neighbours)
+
         elif self.mode == 'combined':
             # Apply both behaviors with weighted sum
             SteeringForce += self.wander(delta) * self.wander_amount
             SteeringForce += self.separation(self.neighbours) * self.separation_amount
             SteeringForce += self.alignment(self.neighbours)
+            SteeringForce += self.cohesion(self.neighbours)
 
         # Truncate the steering force to the maximum allowed
         SteeringForce.truncate(self.max_force)
@@ -207,6 +213,20 @@ class Agent(object):
             AverageHeading -= self.vel
 
         return AverageHeading
+    
+    def cohesion(self, group):
+        CentreMass = Vector2D()
+        SteeringForce = Vector2D()
+        AvgCount = 0
+        for bot in group:
+            if bot != self and bot in self.neighbours:
+                CentreMass += bot.pos
+                AvgCount += 1
+        if AvgCount > 0:
+            CentreMass /= float(AvgCount)
+            SteeringForce = self.seek(CentreMass)
+
+        return SteeringForce
 
 
     def seek(self, target_pos):

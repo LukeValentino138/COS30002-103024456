@@ -16,7 +16,8 @@ from path import Path
 AGENT_MODES = {
     KEY._1: 'wander',
     KEY._2: 'separation',
-    KEY._3: 'combined'
+    KEY._3: 'alignment',
+    KEY._4: 'combined'
 }
 
 class Agent(object):
@@ -67,7 +68,7 @@ class Agent(object):
         self.neighbour_radius = 100.0
 
         # Parameters for steering behaviors
-        self.wander_amount = 20.0
+        self.wander_amount = 1.0
         self.separation_amount = 75.0
 
         # debug draw info?
@@ -84,18 +85,21 @@ class Agent(object):
         elif self.mode == 'separation':
             # Apply Separation behavior
             SteeringForce += self.separation(self.neighbours) * self.separation_amount
+        
+        elif self.mode == 'alignment':
+            # Apply Alignment behavior
+            SteeringForce += self.alignment(self.neighbours)
 
         elif self.mode == 'combined':
             # Apply both behaviors with weighted sum
             SteeringForce += self.wander(delta) * self.wander_amount
             SteeringForce += self.separation(self.neighbours) * self.separation_amount
+            SteeringForce += self.alignment(self.neighbours)
 
         # Truncate the steering force to the maximum allowed
         SteeringForce.truncate(self.max_force)
 
         return SteeringForce
-
-
 
     def update(self, delta):
         ''' update vehicle position and orientation '''
@@ -105,7 +109,7 @@ class Agent(object):
         force.truncate(self.max_force)
         ## limit force? <-- for wander
         # ...
-        # determin the new accelteration
+        # determine the new acceleration
         self.accel = force / self.mass  # not needed if mass = 1.0
         # new velocity
         self.vel += self.accel * delta
@@ -186,6 +190,24 @@ class Agent(object):
                 if ToBot.lengthSq() > 0:  # Avoid division by zero
                     SteeringForce += ToBot.normalise() / ToBot.length()
         return SteeringForce
+    
+    def alignment(self, group):
+        AverageHeading = Vector2D()
+        NeighborCount = 0
+
+        for bot in group:
+            # Don’t include self, only include neighbors
+            if bot != self and bot in self.neighbours:
+                AverageHeading += bot.heading
+                NeighborCount += 1
+
+        if NeighborCount > 0:
+            AverageHeading /= NeighborCount
+            AverageHeading = AverageHeading.normalise() * self.max_speed
+            AverageHeading -= self.vel
+
+        return AverageHeading
+
 
     def seek(self, target_pos):
         ''' move towards target position '''

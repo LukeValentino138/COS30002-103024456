@@ -40,8 +40,6 @@ class World(object):
 
         if self.show_info:
                     infotext = ', '.join(set(agent.mode for agent in self.agents))
-                    # infotext += f" | Alignment: {self.agents[0].alignment_amount:.2f}"
-                    # infotext += f" | Cohesion: {self.agents[0].cohesion_amount:.2f}"
                     infotext += f" | Separation: {self.agents[0].separation_amount:.2f}"
                     egi.white_pen()
                     egi.text_at_pos(0, 0, infotext)

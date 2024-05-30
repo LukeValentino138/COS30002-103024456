@@ -14,7 +14,7 @@ from random import random, randrange, uniform
 from path import Path
 
 AGENT_MODES = {
-    KEY._1: 'seek',
+    KEY._1: 'stationary',
     KEY._7: 'follow_path',
 }
 

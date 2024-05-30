@@ -17,7 +17,7 @@ from world import World
 from agent import Agent, AGENT_MODES  # Agent with seek, arrive, flee and pursuit
 from object import Object
 from targetAgent import TargetAgent
-
+from attackingAgent import AttackingAgent
 
 def on_mouse_press(x, y, button, modifiers):
     if button == 1:  # left
@@ -68,7 +68,10 @@ if __name__ == '__main__':
     world.agents.append(target)
     world.targetAgent = target
 
+    attacker = AttackingAgent(world)
+    world.agents.append(attacker)
     
+
     # unpause the world ready for movement
     world.paused = False
 

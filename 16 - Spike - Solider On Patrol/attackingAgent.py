@@ -3,17 +3,22 @@ from agent import Agent
 from graphics import egi, KEY
 from weapons import Rifle, Rocket, Pistol, Grenade
 from path import Path
+from statemachine import StateMachine
+from patrolState import PatrolState
 
 class AttackingAgent(Agent):
 
     def __init__(self, world=None, scale=30.0, mass=1.0):
-        super(AttackingAgent, self).__init__(world, scale, mass, mode='follow_path')
+        super(AttackingAgent, self).__init__(world, scale, mass, mode='patrol')
         self.color = 'RED'
-        self.pos = Vector2D(100,250)
+        self.pos = Vector2D(450, 250)
         self.current_weapon = Rifle(self)
         self.projectiles = []
-        self.path = Path()
         self.randomise_path()
+        self.detection_radius = 100.0 
+
+        self.fsm = StateMachine(self)
+        self.fsm.change_state(PatrolState())
 
     WEAPON_MODES = {
         KEY.F1: 'rifle',
@@ -37,22 +42,51 @@ class AttackingAgent(Agent):
         self.projectiles.append(projectile)
 
     def calculate(self, delta):
-        mode = self.mode
-        if mode == 'follow_path':
-            force = self.follow_path()
-        else:
-            force = super(AttackingAgent, self).calculate(delta)
-        self.force = force
-        return force
+        return self.force
 
     def update(self, delta):
-        # use inherited update + addon
-        super().update(delta)
+        self.fsm.update(delta) 
+
+        self.force.truncate(self.max_force)  
+
+        self.accel = self.force / self.mass  
+
+        self.vel += self.accel * delta  
+        self.vel.truncate(self.max_speed)  
+
+        self.pos += self.vel * delta
+
+        if self.vel.lengthSq() > 0.00000001: 
+            self.heading = self.vel.get_normalised()
+            self.side = self.heading.perp()
+
+        self.world.wrap_around(self.pos)
+
         for projectile in self.projectiles:
             projectile.update(delta)
 
     def render(self):
-        # use inherited render + addon
         super().render()
         for projectile in self.projectiles:
             projectile.render()
+
+    def seek_waypoint(self):
+        current_waypoint = self.path.current_pt()
+        return self.seek(current_waypoint)
+
+    def check_waypoint_distance(self):
+        current_waypoint = self.path.current_pt()
+        if current_waypoint and self.pos.distanceSq(current_waypoint) < self.waypoint_threshold ** 2:
+            return True
+        return False
+
+    def get_next_waypoint(self):
+        self.path.inc_current_pt()
+
+    def detect_enemy(self):
+        for agent in self.world.agents:
+            if agent is not self:  # Don't check against itself
+                distance = self.pos.distance(agent.pos)
+                if distance < self.detection_radius:
+                    return agent  # Return the detected enemy
+        return None

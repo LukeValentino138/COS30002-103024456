@@ -16,7 +16,6 @@ from path import Path
 AGENT_MODES = {
     KEY._1: 'stationary',
     KEY._2: 'patrol',
-    KEY._7: 'follow_path',
 }
 
 class Agent(object):
@@ -103,7 +102,7 @@ class Agent(object):
     def render(self, color=None):
         ''' Draw the triangle agent with color'''
         # draw the path if it exists and the mode is follow
-        if self.mode == 'follow_path':
+        if self.mode == 'patrol':
             self.path.render()
             pass
 

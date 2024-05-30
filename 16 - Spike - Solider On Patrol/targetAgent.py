@@ -5,14 +5,14 @@ from graphics import egi
 
 class TargetAgent(Agent):
     def __init__(self, world=None, scale=30.0, mass=1.0):
-        super(TargetAgent, self).__init__(world, scale, mass, mode='follow_path')
+        super(TargetAgent, self).__init__(world, scale, mass, mode='patrol')
         self.color = 'BLUE'
         self.hit_color = 'RED'  
         self.current_color = self.color  
         self.path = Path(looped=True)
         waypoints = [Vector2D(400, 50), Vector2D(400, 450)]
         self.set_path(waypoints)
-        self.pos = Vector2D(400, 50)
+        self.pos = Vector2D(400, 250)
         self.radius = scale  # radius of the target for collision detection
         self.hit_duration = 0.5  #
         self.hit_timer = 0
@@ -22,7 +22,7 @@ class TargetAgent(Agent):
 
     def calculate(self, delta):
         mode = self.mode
-        if mode == 'follow_path':
+        if mode == 'patrol':
             force = self.follow_path()
         else:
             force = super(TargetAgent, self).calculate(delta)

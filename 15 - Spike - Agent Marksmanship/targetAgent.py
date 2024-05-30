@@ -1,18 +1,21 @@
 from agent import Agent
 from path import Path
 from vector2d import Vector2D
-from point2d import Point2D
-from math import pi, sin, cos
-from graphics import egi, KEY
+from graphics import egi
 
 class TargetAgent(Agent):
     def __init__(self, world=None, scale=30.0, mass=1.0):
-        super(TargetAgent, self).__init__(world, scale, mass, mode='')
+        super(TargetAgent, self).__init__(world, scale, mass, mode='follow_path')
         self.color = 'BLUE'
+        self.hit_color = 'RED'  
+        self.current_color = self.color  
         self.path = Path(looped=True)
         waypoints = [Vector2D(400, 50), Vector2D(400, 450)]
         self.set_path(waypoints)
         self.pos = Vector2D(400, 50)
+        self.radius = scale  # radius of the target for collision detection
+        self.hit_duration = 0.5  #
+        self.hit_timer = 0
 
     def set_path(self, waypoints):
         self.path.set_pts(waypoints)
@@ -26,17 +29,37 @@ class TargetAgent(Agent):
         self.force = force
         return force
 
+    def update(self, delta):
+        super().update(delta)
+        self.check_collision()
+        if self.hit_timer > 0:
+            self.hit_timer -= delta
+            if self.hit_timer <= 0:
+                self.hit_timer = 0  # stops the timer from being negative
+
+    def check_collision(self):
+        for projectile in self.world.attackingAgent.projectiles:
+            if (self.pos - projectile.pos).length() < self.radius:
+                self.handle_hit(projectile)
+
+    def handle_hit(self, projectile):
+        # remove the projectile
+        self.world.attackingAgent.projectiles.remove(projectile)
+        print("Hit detected!")
+        # set hit timer
+        self.hit_timer = self.hit_duration
+
+
     def render(self, color=None):
         # draw the path if it exists and the mode is follow
         if self.mode == 'follow_path':
             self.path.render()
             pass
 
-        # draw the ship
-        egi.set_pen_color(name=self.color)
-        pts = self.world.transform_points(self.vehicle_shape, self.pos,
-                                          self.heading, self.side, self.scale)
-        # draw it!
+
+        current_color = self.hit_color if self.hit_timer > 0 else self.color
+
+        egi.set_pen_color(name=current_color)
         egi.circle(self.pos, self.bRadius)
 
         # add some handy debug drawing info lines - force and velocity

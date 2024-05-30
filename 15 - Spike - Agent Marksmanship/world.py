@@ -20,7 +20,7 @@ class World(object):
         self.hunter = None
         self.targetAgent = None
         self.agents = []
-        self.objects = []
+        self.attackingAgent = None
         self.paused = True
         self.show_info = True
 
@@ -39,6 +39,9 @@ class World(object):
 
         if self.show_info:
             infotext = ', '.join(set(agent.mode for agent in self.agents))
+            if self.attackingAgent and self.attackingAgent.current_weapon:
+                weapon_info = f"Current Weapon: {type(self.attackingAgent.current_weapon).__name__}"
+                infotext = f"{infotext} | {weapon_info}"
             egi.white_pen()
             egi.text_at_pos(0, 0, infotext)
 

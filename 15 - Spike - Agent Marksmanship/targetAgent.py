@@ -7,7 +7,7 @@ from graphics import egi, KEY
 
 class TargetAgent(Agent):
     def __init__(self, world=None, scale=30.0, mass=1.0):
-        super(TargetAgent, self).__init__(world, scale, mass, mode='follow_path')
+        super(TargetAgent, self).__init__(world, scale, mass, mode='')
         self.color = 'BLUE'
         self.path = Path(looped=True)
         waypoints = [Vector2D(400, 50), Vector2D(400, 450)]
@@ -27,7 +27,6 @@ class TargetAgent(Agent):
         return force
 
     def render(self, color=None):
-        ''' Draw the triangle agent with color'''
         # draw the path if it exists and the mode is follow
         if self.mode == 'follow_path':
             self.path.render()

@@ -27,17 +27,14 @@ def on_mouse_press(x, y, button, modifiers):
 def on_key_press(symbol, modifiers):
     if symbol == KEY.P:
         world.paused = not world.paused
-    elif symbol in AGENT_MODES:
-        for agent in world.agents:
-            agent.mode = AGENT_MODES[symbol]
-    elif symbol == KEY.A:
-        world.agents.append(Agent(world))
-
+    elif symbol in AttackingAgent.WEAPON_MODES:
+        world.attackingAgent.select_weapon(AttackingAgent.WEAPON_MODES[symbol])
+    elif symbol == KEY.SPACE:
+        world.attackingAgent.fire_weapon(world.targetAgent.pos)
     # Toggle debug force line info on the agent
     elif symbol == KEY.I:
         for agent in world.agents:
             agent.show_info = not agent.show_info
-
 
 
 def on_resize(cx, cy):
@@ -70,7 +67,8 @@ if __name__ == '__main__':
 
     attacker = AttackingAgent(world)
     world.agents.append(attacker)
-    
+    world.attackingAgent = attacker
+
 
     # unpause the world ready for movement
     world.paused = False

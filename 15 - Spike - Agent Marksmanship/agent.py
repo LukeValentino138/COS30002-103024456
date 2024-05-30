@@ -60,7 +60,7 @@ class Agent(object):
         self.wander_jitter = 10.0 * scale
         self.bRadius = scale
         # Force and speed limiting code
-        self.max_speed = 5.0 * scale
+        self.max_speed = 2.0 * scale
         self.max_force = 500.0
 
         # debug draw info?

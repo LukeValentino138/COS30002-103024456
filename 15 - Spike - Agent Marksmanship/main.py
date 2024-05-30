@@ -30,7 +30,7 @@ def on_key_press(symbol, modifiers):
     elif symbol in AttackingAgent.WEAPON_MODES:
         world.attackingAgent.select_weapon(AttackingAgent.WEAPON_MODES[symbol])
     elif symbol == KEY.SPACE:
-        world.attackingAgent.fire_weapon(world.targetAgent.pos)
+        world.attackingAgent.fire_weapon(world.targetAgent)
     # Toggle debug force line info on the agent
     elif symbol == KEY.I:
         for agent in world.agents:

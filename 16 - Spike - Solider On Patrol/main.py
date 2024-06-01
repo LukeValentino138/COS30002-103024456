@@ -29,12 +29,12 @@ def on_key_press(symbol, modifiers):
         world.paused = not world.paused
     elif symbol in AttackingAgent.WEAPON_MODES:
         world.attackingAgent.select_weapon(AttackingAgent.WEAPON_MODES[symbol])
-    elif symbol == KEY.SPACE:
-        world.attackingAgent.fire_weapon(world.targetAgent)
-    # Toggle debug force line info on the agent
     elif symbol == KEY.I:
         for agent in world.agents:
             agent.show_info = not agent.show_info
+    elif symbol == KEY.T:
+        target = TargetAgent(world)
+        world.agents.append(target)
 
 
 def on_resize(cx, cy):
@@ -63,7 +63,6 @@ if __name__ == '__main__':
 
     target = TargetAgent(world)
     world.agents.append(target)
-    world.targetAgent = target
 
     attacker = AttackingAgent(world)
     world.agents.append(attacker)

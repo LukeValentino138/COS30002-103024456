@@ -10,12 +10,14 @@ class TargetAgent(Agent):
         self.hit_color = 'RED'  
         self.current_color = self.color  
         self.path = Path(looped=True)
-        waypoints = [Vector2D(400, 50), Vector2D(400, 450)]
-        self.set_path(waypoints)
-        self.pos = Vector2D(400, 250)
+        self.randomise_path()
         self.radius = scale  # radius of the target for collision detection
         self.hit_duration = 0.5  #
         self.hit_timer = 0
+        self.health = 3
+        self.path_length = 3
+        self.max_speed = 1 * scale
+
 
     def set_path(self, waypoints):
         self.path.set_pts(waypoints)
@@ -32,6 +34,9 @@ class TargetAgent(Agent):
     def update(self, delta):
         super().update(delta)
         self.check_collision()
+        if self.health <=0:
+            self.world.agents.remove(self)
+            return
         if self.hit_timer > 0:
             self.hit_timer -= delta
             if self.hit_timer <= 0:
@@ -45,7 +50,7 @@ class TargetAgent(Agent):
     def handle_hit(self, projectile):
         # remove the projectile
         self.world.attackingAgent.projectiles.remove(projectile)
-        print("Hit detected!")
+        self.health -=1
         # set hit timer
         self.hit_timer = self.hit_duration
 

@@ -42,6 +42,7 @@ class Agent(object):
         self.force = Vector2D()  # current steering force
         self.accel = Vector2D() # current acceleration due to force
         self.mass = mass
+        self.path_length = 10
 
         # data for drawing this agent
         self.color = 'ORANGE'
@@ -155,8 +156,8 @@ class Agent(object):
         cx = self.world.cx # width
         cy = self.world.cy # height
         margin = min(cx, cy) * (1/6) # use this for padding in the next line ...
-        length = 10
-        self.path.create_random_path(length, margin, margin, cx - margin, cy - margin, looped=True ) 
+
+        self.path.create_random_path(self.path_length, margin, margin, cx - margin, cy - margin, looped=True ) 
 
     def arrive(self, target_pos, speed):
         ''' this behaviour is similar to seek() but it attempts to arrive at

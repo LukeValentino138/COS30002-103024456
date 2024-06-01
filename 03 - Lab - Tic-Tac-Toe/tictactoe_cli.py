@@ -44,8 +44,8 @@ board = [' '] * 9
 current_player = ''  # 'x' or 'o' for first and second player
 
 players = {
-	'x': 'Human',
-	'o': 'Super AI',  # final comma is optional, but doesn't hurt
+	'x': 'AI 1',
+	'o': 'AI 2',  # final comma is optional, but doesn't hurt
 }
 
 winner = None
@@ -102,9 +102,41 @@ def get_human_move():
 
 def get_ai_move():
 	'''Get the AI's next move '''
-	# A simple dumb random move - valid or NOT!
-	# Note: It is the models responsibility to check for valid moves...
-	return randrange(9)  # [0..8]
+	#Iterate through board, check if each move produces a win, if it does return it, else move on.
+	for i in range(9):
+		if  board[i] == ' ':
+			board[i] = 'o'
+			if check_for_result() == 'o':
+				board[i] = ' '
+				return i
+			board[i] = ' '
+		
+	#same thing but for losing moves
+	for i in range(9):
+		if  board[i] == ' ':
+			board[i] = 'x'
+			if check_for_result() == 'x':
+				board[i] = ' '
+				return i
+			board[i] = ' '
+
+	#random move if no winning or losing move is found
+	while True:
+		guess = randrange(9)
+		if board[guess] == ' ':
+			return guess
+	
+def get_ai_move2():
+	points_set = [3, 2, 3, 2, 4, 2, 3, 2, 3]
+	
+	# Find all available moves and their priorities
+	available_moves = [(i, points_set[i]) for i in range(9) if board[i] == ' ']
+
+	# Sort available moves by priority (descending)
+	available_moves.sort(key=lambda x: x[1], reverse=True)
+
+	# Return the position with the highest priority
+	return available_moves[0][0] if available_moves else None
 
 
 #==============================================================================
@@ -115,9 +147,9 @@ def process_input():
 	# save the next move into a global variable
 	global move
 	if current_player == 'x':
-		move = get_human_move()
-	else:
 		move = get_ai_move()
+	else:
+		move = get_ai_move2()
 
 
 def update_model():
@@ -182,27 +214,25 @@ The number corresponds to a board position as illustrated:
 
 
 if __name__ == '__main__':
-	# Welcome ...
-	print('Welcome to the amazing+awesome tic-tac-toe!')
-	show_human_help()
+    # Welcome message and help instructions
+    print('Welcome to the amazing+awesome tic-tac-toe!')
 
-	# by default the human player starts. This could be random or a choice.
-	current_player = 'x'
+    win_count = {'x': 0, 'o': 0, 'tie': 0}
 
-	# show the initial board and the current player's move
-	render_board()
+    for _ in range(1000):
+        # Initialize the game state for each run
+        board = [' '] * 9
+        current_player = 'x'
+        winner = None
 
-	# Standard game loop structure
-	while winner is None:
-		process_input()
-		update_model()
-		render_board()
+        # Standard game loop structure
+        while winner is None:
+            process_input()
+            update_model()
 
-	# Some pretty messages for the result
-	print(HR)
-	if winner == 'tie':
-		print('TIE!')
-	elif winner in players:
-		print('%s is the WINNER!!!' % players[winner])
-	print(HR)
-	print('Game over. Goodbye')
+        if winner == 'tie':
+            win_count['tie'] += 1
+        else:
+            win_count[winner] += 1
+
+    print(f'Final counts after 1000 games: Wins for X: {win_count["x"]}, Wins for O: {win_count["o"]}, Ties: {win_count["tie"]}')

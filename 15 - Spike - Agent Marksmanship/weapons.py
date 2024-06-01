@@ -11,8 +11,8 @@ class Rocket(Weapon):
 
 class Pistol(Weapon):
     def fire(self, target_pos):
-        return Projectile(self.owner.pos, target_pos, speed=450, accuracy=0.25)
+        return Projectile(self.owner.pos, target_pos, speed=450, accuracy=0.35)
 
 class Grenade(Weapon):
     def fire(self, target_pos):
-        return Projectile(self.owner.pos, target_pos, speed=130, accuracy=0.0)
+        return Projectile(self.owner.pos, target_pos, speed=130, accuracy=0.2)

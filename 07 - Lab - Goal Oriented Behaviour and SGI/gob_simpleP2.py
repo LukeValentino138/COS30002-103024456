@@ -36,10 +36,10 @@ goals = {
 
 # Global (read-only) actions and effects
 actions = {
-    'get raw food': { 'Eat': -3, 'Sleep': 3 },
-    'get snack': { 'Eat': -2, 'Sleep': 2 },
-    'sleep in bed': { 'Sleep': -4, 'Eat': 4 },
-    'sleep on sofa': { 'Sleep': -2, 'Eat': 2 }
+    'get raw food': { 'Eat': -3, 'Sleep': 2 },
+    'get snack': { 'Eat': -2, 'Sleep': 1 },
+    'sleep in bed': { 'Sleep': -4, 'Eat': 2 },
+    'sleep on sofa': { 'Sleep': -2, 'Eat': 1 }
 }
 
 

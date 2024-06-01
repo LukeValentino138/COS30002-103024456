@@ -98,8 +98,7 @@ class BoxWorldWindow(pyglet.window.Window):
         self.world.add_agent(slow_agent)
         self.world.add_agent(slow_agent2)
 
-
-        self.world.plan_path("AStar", 0)
+        self.world.plan_path(search_modes[self.search_mode], 0)
 
         pyglet.clock.schedule_interval(self.update, 1.0 / 60.0)
 
@@ -149,17 +148,17 @@ class BoxWorldWindow(pyglet.window.Window):
                 self.search_mode += 1
                 if self.search_mode >= len(search_modes):
                     self.search_mode = 0
-                self.plan_path()
+                self.world.plan_path(search_modes[self.search_mode], 0)
                 self._update_label('search')
             elif symbol == key.N:
                 self.search_mode -= 1
                 if self.search_mode < 0:
                     self.search_mode = len(search_modes)-1
-                self.plan_path()
+                self.world.plan_path(search_modes[self.search_mode], 0)
                 self._update_label('search')
             # Plan a path using the current search mode?
             elif symbol == key.SPACE:
-                self.plan_path()
+                self.world.plan_path(search_modes[self.search_mode], 0)
             elif symbol == key.E:
                 cfg['EDGES_ON'] = not cfg['EDGES_ON']
             elif symbol == key.L:

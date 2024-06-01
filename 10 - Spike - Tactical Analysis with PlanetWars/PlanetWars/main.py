@@ -512,7 +512,7 @@ if __name__ == '__main__':
 
     settings = {
         # text file - planet position/size, player start locations (and fleet details)
-        'map_file': './maps/map5.txt',
+        'map_file': './maps/map55.txt',
         # usually two players (what maps expect) but can have more
         'players': [
             #'OneMove',
@@ -527,7 +527,7 @@ if __name__ == '__main__':
         'start_paused': True,
         'game_over_quit': True,  # quit (close window) when game stops
         # game updates per second (not UI) ?
-        'update_target': 20,
+        'update_target': 100,
         # show the image or just black?
         'background_img': True,
         # window (passed to pyglet) details

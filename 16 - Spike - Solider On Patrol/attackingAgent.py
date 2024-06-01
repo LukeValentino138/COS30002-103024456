@@ -16,7 +16,7 @@ class AttackingAgent(Agent):
         self.projectiles = []
         self.randomise_path()
         self.detection_radius = 100.0 
-        self.max_speed = 5 * scale
+        self.max_speed = 3 * scale
 
         self.fsm = StateMachine(self)
         self.fsm.change_state(PatrolState())

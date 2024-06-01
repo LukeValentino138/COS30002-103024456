@@ -70,9 +70,9 @@ class Agent(object):
 
         # Parameters for steering behaviors
         self.wander_amount = 1.0
-        self.separation_amount = 75.0
+        self.separation_amount = 120.0
         self.alignment_amount = 100.0
-        self.cohesion_amount = 50.0
+        self.cohesion_amount = 20.0
 
         # debug draw info?
         self.show_info = False

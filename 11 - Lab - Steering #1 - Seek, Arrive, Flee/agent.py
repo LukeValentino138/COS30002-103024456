@@ -26,12 +26,12 @@ class Agent(object):
     # NOTE: Class Object (not *instance*) variables!
     DECELERATION_SPEEDS = {
         'slow': 0.9,
-        'normal': 1.5,
-        'fast': 2
+        'normal': 0.4,
+        'fast': 0.1
         ### ADD 'normal' and 'fast' speeds here
     }
 
-    def __init__(self, world=None, scale=30.0, mass=100.0, mode='seek'):
+    def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek'):
         # keep a reference to the world object
         self.world = world
         self.mode = mode
@@ -45,7 +45,7 @@ class Agent(object):
         self.acceleration = Vector2D()  # current steering force
         self.mass = mass
         # limits?
-        self.max_speed = 500000.0
+        self.max_speed = 500.0
         # data for drawing this agent
         self.color = 'ORANGE'
         self.vehicle_shape = [

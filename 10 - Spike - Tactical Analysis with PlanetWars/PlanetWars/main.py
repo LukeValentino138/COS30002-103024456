@@ -512,7 +512,7 @@ if __name__ == '__main__':
 
     settings = {
         # text file - planet position/size, player start locations (and fleet details)
-        'map_file': './maps/map55.txt',
+        'map_file': './maps/map25.txt',
         # usually two players (what maps expect) but can have more
         'players': [
             #'OneMove',
